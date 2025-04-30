@@ -1,4 +1,5 @@
 import Search from "./components/Search.jsx";
+import Spinner from "./components/Spinner.jsx";
 import { useEffect,useState } from "react";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
@@ -15,16 +16,35 @@ const API_OPTIONS = {
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const[errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [movieList, setMovieList] = useState([]);
+  //API利用時に1~2秒時間がかかるため、Loading画面を表示する。
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchMovies = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
     try {
       const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
 
       const response = await fetch(endpoint, API_OPTIONS);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch movies');
+      }
+      const data = await response.json();
+
+      if(data.Response === 'False') {
+        setErrorMessage(data.Error || 'Failed to fetch movies');
+        setMovieList([]);
+        return;
+      }
+
+      setMovieList(data.results || []);
     } catch (error) {
       console.error(`Error fetching movies: ${ error }`);
+    } finally {
+      setIsLoading
     }
   }
   useEffect(() => {
@@ -44,9 +64,20 @@ const App = () => {
         </header>
 
         <section className="all-movies">
-          <h2>All Movies</h2>
+          <h2 className="mt-[40px]">All Movies</h2>
 
-          {errorMessage && <p className="text red 500px">{errorMessage}</p>}
+          {isLoading ? (
+            <Spinner />
+          ) : errorMessage ? (
+              <p className="text-red-500">{errorMessage}</p>
+          ):(
+            <ul>
+            {movieList.map((movie) => (
+              <p key={movie.id} className="text-white">{movie.title}</p>
+            ))}
+            </ul>
+          )}
+
         </section>
 
 
