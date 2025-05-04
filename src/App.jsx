@@ -1,7 +1,8 @@
 import Search from "./components/Search.jsx";
 import Spinner from "./components/Spinner.jsx";
 import MovieCard from "./components/MovieCard.jsx";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
+import {useDebounce } from "react-use";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -21,6 +22,11 @@ const App = () => {
   const [movieList, setMovieList] = useState([]);
   //API利用時に1~2秒時間がかかるため、Loading画面を表示する。
   const [isLoading, setIsLoading] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  //useDebounceは、指定した時間が経過した後に関数を実行するためのカスタムフックです。
+  //この場合、500ミリ秒後にsetDebouncedSearchTermを実行します。
+  useDebounce(() => setDebouncedSearchTerm(searchTerm),500,[searchTerm]);
 
   const fetchMovies = async (query = '') => {
     setIsLoading(true);
@@ -52,8 +58,8 @@ const App = () => {
     }
   }
   useEffect(() => {
-    fetchMovies(searchTerm);
-  }, [searchTerm]);
+    fetchMovies(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
   return (
     <main>
       <div className="pattern"/>
