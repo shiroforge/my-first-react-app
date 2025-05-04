@@ -3,6 +3,7 @@ import Spinner from "./components/Spinner.jsx";
 import MovieCard from "./components/MovieCard.jsx";
 import { useEffect, useState } from "react";
 import {useDebounce } from "react-use";
+import { updateSearchCount } from "./appwrite.js";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -44,13 +45,16 @@ const App = () => {
       const data = await response.json();
 
       if (data.Response === 'False') {
-        console.error('データの取得に失敗しました');
         setErrorMessage(data.Error || 'Failed to fetch movies');
         setMovieList([]);
         return;
       }
-      console.log('data:', data);
+
       setMovieList(data.results || []);
+
+      if (query && data.results.length > 0) {
+        await updateSearchCount(query, data.results[0]);
+      }
     } catch (error) {
       console.error(`Error fetching movies: ${ error }`);
     } finally {
