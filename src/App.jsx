@@ -1,10 +1,11 @@
 import Search from "./components/Search.jsx";
 import Spinner from "./components/Spinner.jsx";
+import MovieCard from "./components/MovieCard.jsx";
 import { useEffect,useState } from "react";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 
-const API_KEY = import.meta.env.VITE_API_KEY;
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const API_OPTIONS = {
   method: "GET",
@@ -21,11 +22,13 @@ const App = () => {
   //API利用時に1~2秒時間がかかるため、Loading画面を表示する。
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (query = '') => {
     setIsLoading(true);
     setErrorMessage('');
     try {
-      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = query
+        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
 
       const response = await fetch(endpoint, API_OPTIONS);
 
@@ -34,22 +37,23 @@ const App = () => {
       }
       const data = await response.json();
 
-      if(data.Response === 'False') {
+      if (data.Response === 'False') {
+        console.error('データの取得に失敗しました');
         setErrorMessage(data.Error || 'Failed to fetch movies');
         setMovieList([]);
         return;
       }
-
+      console.log('data:', data);
       setMovieList(data.results || []);
     } catch (error) {
       console.error(`Error fetching movies: ${ error }`);
     } finally {
-      setIsLoading
+      setIsLoading(false);
     }
   }
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    fetchMovies(searchTerm);
+  }, [searchTerm]);
   return (
     <main>
       <div className="pattern"/>
