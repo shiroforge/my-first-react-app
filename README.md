@@ -1,3 +1,6 @@
+# Reactで、TMDBを利用して、映画情報を表示するためのアプリケーションを作成
+参考URL：https://www.youtube.com/watch?v=dCLhUialKPQ&list=PL8cnFNxiiV6szyHt5k0Onwr6n3tvfmrlZ&index=2
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
